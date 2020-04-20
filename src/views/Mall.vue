@@ -33,7 +33,8 @@
                     <swiper-slide v-for="(re,index) in recommend" :key="index">
                         <img :src="re.image">
                         <span>{{re.goodsName}}</span>
-                        <span>￥{{re.price}}￥{{re.mallPrice}}</span>
+                        <br>
+                        <span>￥{{re.price|toMoney}} ￥{{re.mallPrice|toMoney}}</span>
                     </swiper-slide>
                     <div class="swiper-pagination" slot="pagination"></div>
                 </swiper>
@@ -42,12 +43,25 @@
         <Floor :floor-data="floor1"></Floor>
         <Floor :floor-data="floor2"></Floor>
         <Floor :floor-data="floor3"></Floor>
+        <!--        热卖模块-->
+        <div class="hot-area">
+            <div class="hot-title">--<van-icon name="fire-o" />热卖商品--</div>
+            <div class="hot-goods">
+                <van-row>
+                    <van-col span="12" v-for="(item,index) in hotGoods" :key="index">
+                        <GoodsInfo :goods-image="item.image" :goods-name="item.name" :goods-price="item.price"></GoodsInfo>
+                    </van-col>
+                </van-row>
+            </div>
+        </div>
     </div>
 </template>
 
 <script>
     import Vue from 'vue';
     import Floor from "../components/Floor";
+    import {toMoney} from '../filter/moneyFilter';
+    import GoodsInfo from "../components/GoodsInfo";
     //vant组件
     import {
         Swipe,
@@ -68,6 +82,7 @@
     export default {
         components: {
             Floor,
+            GoodsInfo,
             swiper,
             swiperSlide,
         },
@@ -88,7 +103,8 @@
                 recommend: [],
                 floor1: {},
                 floor2: {},
-                floor3: {}
+                floor3: {},
+                hotGoods:[]
             }
         },
         directives: {
@@ -98,34 +114,37 @@
             this.$axios.get('/api/index').then((res) => {
                 if (res.status === 200) {
                     let data = res.data.data;
+                    console.log(data)
                     this.category = data.category;
                     this.adBanner = data.advertesPicture.PICTURE_ADDRESS;
                     this.recommend = data.recommend;
                     this.floor1 = data.floor1;
-                    this.floor2 =data.floor2;
+                    this.floor2 = data.floor2;
                     this.floor3 = data.floor3;
                     this.floor1.name = data.floorName.floor1;
                     this.floor2.name = data.floorName.floor2;
                     this.floor3.name = data.floorName.floor3;
+                    this.hotGoods = data.hotGoods;
                 }
             }).catch((err) => {
                 console.log(err);
             })
         },
-        beforeMount() {
-            console.log(this.category);
-
+        filters: {
+            toMoney
         }
     }
 </script>
 
 <style lang="scss" scoped>
-    #mall{
+    #mall {
         color: #999;
         background: rgb(231, 231, 231);
+
         .search-bar {
             background: #845d32;
             height: 1.2rem;
+
             .ico-bar {
                 margin: 0.25rem 0 0 .3rem;
                 font-size: .65rem;
@@ -192,6 +211,7 @@
             box-sizing: border-box;
             box-shadow: 0 0 0.1rem #BEBEBE;
             background-color: #fff;
+
             .recommend-title {
                 width: 100%;
                 font-size: 0.55rem;
@@ -201,6 +221,7 @@
 
             .recommend-body {
                 font-size: 0.2rem;
+
                 img {
                     width: 99%;
                     height: 2.8rem;
@@ -214,6 +235,13 @@
 
         }
 
+    }
+    .hot-title{
+        box-shadow: 0 0 0.1rem #BEBEBE;
+        border-radius: 0.14rem;
+        margin-top: 0.2rem;
+        background-color: #fff;
+        text-align: center;
     }
 
 </style>
